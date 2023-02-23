@@ -11,7 +11,7 @@ The aim of this project is to optimize a C program that generates mazes using th
 2. Compile `maze.c` with `clang -O3 -o maze maze.c`.
 3. Create a copy of the `maze.c` file under the name `maze_optimized.c`.
 4. Open the file and find blocks of code outlined with the comments `// TODO: optimize` and `// ---`.
-5. Change the code to optimize the program to improve `task-clock` measurement for the `perf stat ./maze_optimized 16384 16384 maze_optimized.pbm` command in comparison to `perf stat ./maze 16384 16384 maze.pbm` command by at least five seconds on average for five runs. To compile the code, use the `clang -O3 -o maze_optimized maze_optimized.c` command.
+5. Change the code to optimize the program to improve `seconds user` measurement for the `perf stat ./maze_optimized 16384 16384 maze_optimized.pbm` command in comparison to `perf stat ./maze 16384 16384 maze.pbm` command by at least four seconds on average for five runs. To compile the code, use the `clang -O3 -o maze_optimized maze_optimized.c` command.
 6. Compare the output files with `vimdiff maze.pbm maze_optimized.pbm`. The files must be the same.
 
 ## Rules
@@ -25,6 +25,12 @@ The aim of this project is to optimize a C program that generates mazes using th
 * Do NOT change the core stack data structure of the Recursive Backtracker. It must be stack. You may change the underlying implementation of the stack, but not replace it with something else.
 * Do NOT generate more than two `.pbm` files in your home directory. Remember that each file is more than two gigabytes in size. Remove the files after submission.
 * Do NOT use assembly tricks, intrinsics, or any other special library functions to boost the speed of your code. You are only allowed to change the underlying implementation of the stack or the maze and delete or reorganize the code.
+
+## Recommendations
+
+1. Find good `perf` counters to analyze. A good starting point could be the following: '-e cycles,instructions,branch-instructions,branch-misses,cache-misses,cache-references`.
+2. Look into the IPC (Instructions per Cycle), percentage of branch mispredictions, and cache misses. If the IPC rounded is far from four (our AMD Zen 3 CPU on the server is a 4-wide-issue CPU) or the number of branch or cache misses is not close to zero, that metric has to be considered a hint as to where put most of your effort optimizing things in `maze_optimized.c`.
+3. Splitting variables (if the IPC is low), eliminating small loops (unrolling them), and removing branching code by using predication (if branch misprediction is high), using cache-efficient data structures, and making data access predictable (if the cache miss rate is high) — these are just some code modifications that you can pursue based on your collected `perf` metrics.
 
 ## What to Submit
 
