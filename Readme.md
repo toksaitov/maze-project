@@ -3,11 +3,11 @@ Accelerating a Maze Generator
 
 ![Maze](https://i.imgur.com/uc17nQR.png)
 
-The aim of this project is to optimize a C program that generates mazes using the [Randomized Depth-first Search](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Randomized_depth-first_search) algorithm (Recursive Backtracker). The current implementation of the program takes a significant amount of time to generate large mazes (16384 by 16384 rooms). Your goal is to reduce the execution time of the program by at least 5 seconds on average for five profiling runs by optimizing the code inside the designated TODO blocks. Use the `perf` profiler to get insight into the runtime and performance of your program to make educated guesses on what to improve. Use the theoretical knowledge from lectures about modern CPU microarchitectures to decide what to focus on accelerating the code.
+The aim of this project is to optimize a C program that generates mazes using the [Randomized Depth-first Search](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Randomized_depth-first_search) algorithm (Recursive Backtracker). The current implementation of the program takes a significant amount of time to generate large mazes (16384 by 16384 rooms). Your goal is to reduce the execution time of the program by at least 4 seconds on average for five profiling runs by optimizing the code inside the designated TODO blocks. Use the `perf` profiler to get insight into the runtime and performance of your program to make educated guesses on what to improve. Use the theoretical knowledge from lectures about modern CPU microarchitectures to decide what to focus on accelerating the code.
 
 ## Tasks
 
-1. Upload/clone the `maze.c` source file to our course server `auca.space` from this repository. You have to measure performance on `auca.space` and not on your computer.
+1. Upload/clone the source files to our course server `auca.space` from your private repository that was given to you by the instructor. You have to measure performance on `auca.space` and not on your computer.
 2. Compile `maze.c` with `clang -O3 -o maze maze.c`.
 3. Create a copy of the `maze.c` file under the name `maze_optimized.c`.
 4. Open the file and find blocks of code outlined with the comments `// TODO: optimize` and `// ---`.
@@ -29,18 +29,16 @@ The aim of this project is to optimize a C program that generates mazes using th
 ## Recommendations
 
 1. Find good `perf` counters to analyze. A good starting point could be the following: '-e cycles,instructions,branch-instructions,branch-misses,cache-misses,cache-references`.
-2. Look into the IPC (Instructions per Cycle), percentage of branch mispredictions, and cache misses. If the IPC rounded is far from four (our AMD Zen 3 CPU on the server is a 4-wide-issue CPU) or the number of branch or cache misses is not close to zero, that metric has to be considered a hint as to where put most of your effort optimizing things in `maze_optimized.c`.
+2. Look into the IPC (Instructions per Cycle), percentage of branch mispredictions, and cache misses. If the IPC rounded is far from at least four or the number of branch or cache misses is not close to zero, that metric has to be considered a hint as to where put most of your effort optimizing things in `maze_optimized.c`.
 3. Splitting variables (if the IPC is low), eliminating small loops (unrolling them), and removing branching code by using predication (if branch misprediction is high), using cache-efficient data structures, and making data access predictable (if the cache miss rate is high) — these are just some code modifications that you can pursue based on your collected `perf` metrics.
 
 ## What to Submit
 
-1. In your private course repository that was given to you by the instructor during the lecture, create the path `project-1/`.
-2. Put the `maze_optimized.c` file into that directory.
-3. Commit and push your repository through Git. Submit the last commit URL to Canvas before the deadline.
+Commit and push your changes to your private repository that was given to you by the instructor. Do NOT attempt to upload the generated `.pbm` files. Submit the last commit URL to Moodle before the deadline.
 
 ## Deadline
 
-Check Canvas for information about the deadlines.
+Check Moodle for information about the deadlines.
 
 ## Documentation
 
