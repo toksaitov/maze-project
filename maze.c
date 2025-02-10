@@ -5,15 +5,11 @@
 
 #define PROGRAM_NAME "maze"
 
-// TODO: optimize (optional)
-
 typedef struct node
 {
     size_t x, y;
     struct node *next;
 } node_t;
-
-// ---
 
 int main(int argc, char *argv[])
 {
@@ -21,12 +17,8 @@ int main(int argc, char *argv[])
 
     FILE *output_fd = NULL;
 
-    // TODO: optimize (optional)
-
     double **maze = NULL;
     node_t *stack = NULL;
-
-    // ---
 
     srand(0); // NOLINT(cert-msc51-cpp), we want a predictable sequence
 
@@ -77,8 +69,6 @@ int main(int argc, char *argv[])
         status = EXIT_FAILURE;
         goto end;
     }
-
-    // TODO: optimize
 
     maze = malloc(maze_height_with_walls * sizeof(maze));
     if (!maze) {
@@ -177,11 +167,7 @@ int main(int argc, char *argv[])
         fputs("\n", output_fd);
     }
 
-    // ---
-
 end:
-    // TODO: adjust cleanup (optional)
-
     if (stack) {
         while ((node = stack->next) != NULL) {
             stack->next = node->next;
@@ -201,8 +187,6 @@ end:
         free(maze);
         maze = NULL;
     }
-
-    // ---
 
     if (output_fd) {
         fclose(output_fd);
