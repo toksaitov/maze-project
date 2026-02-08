@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     FILE *output_fd = NULL;
 
     double **maze = NULL;
+    int **visited = NULL;
     node_t *stack = NULL;
 
     srand(0); // NOLINT(cert-msc51-cpp), we want a predictable sequence
@@ -70,24 +71,41 @@ int main(int argc, char *argv[])
         goto end;
     }
 
-    maze = malloc(maze_height_with_walls * sizeof(maze));
+    maze = malloc(maze_width_with_walls * sizeof(maze));
     if (!maze) {
-        perror("Failed to allocate memory to store rows of the maze");
+        perror("Failed to allocate memory to store columns of the maze");
 
         status = EXIT_FAILURE;
         goto end;
     }
-    for (size_t y = 0; y < maze_height_with_walls; ++y) {
-        maze[y] = malloc(maze_width_with_walls * sizeof(*maze));
-        if (!maze[y]) {
-            perror("Failed to allocate memory to store a row of the maze");
+    for (size_t x = 0; x < maze_width_with_walls; ++x) {
+        maze[x] = malloc(maze_height_with_walls * sizeof(*maze));
+        if (!maze[x]) {
+            perror("Failed to allocate memory to store a column of the maze");
 
             status = EXIT_FAILURE;
             goto end;
         }
 
-        for (size_t x = 0; x < maze_width_with_walls; ++x) {
-            maze[y][x] = 1;
+        for (size_t y = 0; y < maze_height_with_walls; ++y) {
+            maze[x][y] = 1;
+        }
+    }
+
+    visited = malloc(maze_width * sizeof(*visited));
+    if (!visited) {
+        perror("Failed to allocate memory to store columns of the visited cell flags");
+
+        status = EXIT_FAILURE;
+        goto end;
+    }
+    for (size_t x = 0; x < maze_width; ++x) {
+        visited[x] = calloc(maze_height, sizeof(**visited));
+        if (!visited[x]) {
+            perror("Failed to allocate memory to store a column of the visited cell flags");
+
+            status = EXIT_FAILURE;
+            goto end;
         }
     }
 
@@ -111,7 +129,8 @@ int main(int argc, char *argv[])
     }
     node->x = curr_x; node->y = curr_y;
     node->next = NULL; stack->next = node;
-    maze[1 + curr_y * 2][1 + curr_x * 2] = 0;
+    visited[curr_x][curr_y] = 1;
+    maze[1 + curr_x * 2][1 + curr_y * 2] = 0;
 
     node_t *popped_node = NULL;
     while (stack->next != NULL) {
@@ -125,7 +144,7 @@ int main(int argc, char *argv[])
             curr_y = (long) popped_node->y + neighbour_dy[i];
             if (curr_x >= 0 && curr_x < (long) maze_width  &&
                 curr_y >= 0 && curr_y < (long) maze_height &&
-                    maze[1 + curr_y * 2][1 + curr_x * 2] != 0) {
+                    !visited[curr_x][curr_y]) {
                 unvisited_dx[unvisited] = neighbour_dx[i];
                 unvisited_dy[unvisited] = neighbour_dy[i];
                 ++unvisited;
@@ -149,11 +168,12 @@ int main(int argc, char *argv[])
             }
             node->x = curr_x; node->y = curr_y;
             node->next = stack->next; stack->next = node;
-            maze[1 + curr_y * 2][1 + curr_x * 2] = 0;
+            visited[curr_x][curr_y] = 1;
+            maze[1 + curr_x * 2][1 + curr_y * 2] = 0;
 
             size_t wall_x = (1 + popped_node->x * 2) + unvisited_dx[i];
             size_t wall_y = (1 + popped_node->y * 2) + unvisited_dy[i];
-            maze[wall_y][wall_x] = 0;
+            maze[wall_x][wall_y] = 0;
         } else {
             free(popped_node);
             popped_node = NULL;
@@ -162,7 +182,7 @@ int main(int argc, char *argv[])
 
     for (size_t y = 0; y < maze_height_with_walls; ++y) {
         for (size_t x = 0; x < maze_width_with_walls; ++x) {
-            fprintf(output_fd, "%d ", (int) maze[y][x]);
+            fprintf(output_fd, "%d ", (int) maze[x][y]);
         }
         fputs("\n", output_fd);
     }
@@ -177,11 +197,22 @@ end:
         stack = NULL;
     }
 
+    if (visited) {
+        for (size_t x = 0; x < maze_width; ++x) {
+            if (visited[x]) {
+                free(visited[x]);
+                visited[x] = NULL;
+            }
+        }
+        free(visited);
+        visited = NULL;
+    }
+
     if (maze) {
-        for (size_t y = 0; y < maze_height_with_walls; ++y) {
-            if (maze[y]) {
-                free(maze[y]);
-                maze[y] = NULL;
+        for (size_t x = 0; x < maze_width_with_walls; ++x) {
+            if (maze[x]) {
+                free(maze[x]);
+                maze[x] = NULL;
             }
         }
         free(maze);
